@@ -288,6 +288,20 @@ class StackOverflow extends Serializable {
     val closest = vectors.map(p => (findClosest(p, means), p))
     val closestGrouped = closest.groupByKey()
 
+    def summarize(vs: Iterable[(Int,Int)]): (String, Double, Int, Int) = {
+      val (langIds, scores) = vs.unzip
+      val sortedScores = scores.toSeq.sorted
+      val clusterSize = sortedScores.length
+      val medianScore = sortedScores(clusterSize/2)
+
+      val langIdxs = (langIds map (_ / langSpread)) toSeq
+      val langCounts = langIds.groupBy(langs(_)).mapValues(_.size)
+      val (langLabel, langCount) = langCounts.maxBy(_._2)
+      val langPercent = (100d * langCount) / clusterSize
+      (langLabel, langPercent, clusterSize, medianScore)
+    }
+    val median = closestGrouped.mapValues(summarize)
+/*
     val median = closestGrouped.mapValues { vs =>
       val langLabel: String   = ??? // most common language in the cluster
       val langPercent: Double = ??? // percent of the questions in the most common language
@@ -296,7 +310,7 @@ class StackOverflow extends Serializable {
 
       (langLabel, langPercent, clusterSize, medianScore)
     }
-
+*/
     median.collect().map(_._2).sortBy(_._4)
   }
 
