@@ -24,8 +24,8 @@ object StackOverflow extends StackOverflow {
     val raw     = rawPostings(lines)
     val grouped = groupedPostings(raw)
     val scored  = scoredPostings(grouped)
-//    val vectors = vectorPostings(scored)
-//    assert(vectors.count() == 2121822, "Incorrect number of vectors: " + vectors.count())
+    val vectors = vectorPostings(scored)
+    assert(vectors.count() == 2121822, "Incorrect number of vectors: " + vectors.count())
 
 //    val means   = kmeans(sampleVectors(vectors), vectors, debug = true)
 //    val results = clusterResults(means, vectors)
@@ -123,8 +123,19 @@ class StackOverflow extends Serializable {
         }
       }
     }
+/*
+    def getVector(pair: (Posting, Int)): TraversableOnce[(Int,Int)] = pair match {
+      case (p, score) => {
+        val langIdx: Option[Int] = firstLangInTag(p.tags, langs)
+        for(i <- langIdx) yield (i,score)
+      }
+    }
+//    scored.flatMap(getVector)
+*/
+    scored flatMap { case (p: Posting, score: Int) =>
+        for( langIdx <- firstLangInTag(p.tags, langs) ) yield (langIdx*langSpread, score)
+    }
 
-    ???
   }
 
 
