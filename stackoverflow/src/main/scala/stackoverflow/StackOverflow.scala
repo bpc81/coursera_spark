@@ -23,7 +23,7 @@ object StackOverflow extends StackOverflow {
     val lines   = sc.textFile("src/main/resources/stackoverflow/stackoverflow.csv")
     val raw     = rawPostings(lines)
     val grouped = groupedPostings(raw)
-//    val scored  = scoredPostings(grouped)
+    val scored  = scoredPostings(grouped)
 //    val vectors = vectorPostings(scored)
 //    assert(vectors.count() == 2121822, "Incorrect number of vectors: " + vectors.count())
 
@@ -99,8 +99,12 @@ class StackOverflow extends Serializable {
           }
       highScore
     }
+    def maxScoreOfPairs(pairs: Iterable[(Posting,Posting)]): (Posting,Int) = {
+      val (questions,answers) = pairs.unzip
+      (questions.head, answerHighScore(answers.toArray))
+    }
 
-    ???
+    grouped.values.map(maxScoreOfPairs)
   }
 
 
