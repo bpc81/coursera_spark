@@ -50,6 +50,11 @@ Temporary Items
 *.class
 *.log
 *.cache
+*.jar
+**/target
+
 
 # Data directory
 data
+
+
