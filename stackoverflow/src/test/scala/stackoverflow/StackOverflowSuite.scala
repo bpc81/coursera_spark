@@ -1,13 +1,10 @@
 package stackoverflow
 
-import org.scalatest.{FunSuite, BeforeAndAfterAll}
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext
-import org.apache.spark.SparkContext._
-import org.apache.spark.rdd.RDD
-import java.io.File
+
+import stackoverflow.StackOverflow.sc
 
 @RunWith(classOf[JUnitRunner])
 class StackOverflowSuite extends FunSuite with BeforeAndAfterAll {
@@ -34,5 +31,32 @@ class StackOverflowSuite extends FunSuite with BeforeAndAfterAll {
     assert(instantiatable, "Can't instantiate a StackOverflow object")
   }
 
+  val rawPostings = testObject.rawPostings(sc.textFile("../../src/main/resources/stackoverflow/stackoverflow.csv"))
+  val groupedPostings = testObject.groupedPostings(rawPostings)
+  val scoredPostings = testObject.scoredPostings(groupedPostings)
+
+  test("grouped postings") {
+    groupedPostings.takeSample(true,20,0) foreach {
+      case (qid: Int, qapairs) => qapairs foreach {
+        case (q: Posting, a: Posting) => {
+          assert(qid === q.id, "grouped question id must match key")
+          assert(Some(qid) === a.parentId, "grouped answer's parentID must match key")
+        }
+      }
+    }
+  }
+
+  test("scored postings are all questions") {
+    scoredPostings.takeSample(true, 20, 0) foreach (p =>
+      assert(p._1.postingType === 1, "scored posting must be a question") )
+  }
+
+  test("given results contained in scored postings") {
+    assert( scoredPostings.lookup( Posting(1,6,None,None,140,Some("CSS")) ) === Array(67) )
+    assert( scoredPostings.lookup( Posting(1,42,None,None,155, Some("PHP"))) === Array(89) )
+    assert( scoredPostings.lookup( Posting(1,72,None,None,16,Some("Ruby"))) === Array(3) )
+    assert( scoredPostings.lookup( Posting(1,126,None,None,33,Some("Java"))) === Array(30) )
+    assert( scoredPostings.lookup( Posting(1,174,None,None,38,Some("C#"))) === Array(20) )
+  }
 
 }
