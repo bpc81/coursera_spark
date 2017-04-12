@@ -34,7 +34,7 @@ class StackOverflowSuite extends FunSuite with BeforeAndAfterAll {
   val rawPostings = testObject.rawPostings(sc.textFile("../../src/main/resources/stackoverflow/stackoverflow.csv"))
   val groupedPostings = testObject.groupedPostings(rawPostings)
   val scoredPostings = testObject.scoredPostings(groupedPostings)
-  val vectors = testObject.vectorPostings(scoredPostings)
+  val vectors = testObject.vectorPostings(scoredPostings).cache()
 
   test("grouped postings") {
     groupedPostings.takeSample(true,20,0) foreach {
@@ -64,12 +64,21 @@ class StackOverflowSuite extends FunSuite with BeforeAndAfterAll {
   }
 
   test("given results contained in vectors") {
-    val myVectors = vectors.persist()
-    assert( myVectors.lookup(350000) contains 67 )
-    assert( myVectors.lookup(100000) contains 89 )
-    assert( myVectors.lookup(300000) contains 3 )
-    assert( myVectors.lookup(50000) contains 30 )
-    assert( myVectors.lookup(200000) contains 20 )
+    assert( vectors.lookup(350000) contains 67 )
+    assert( vectors.lookup(100000) contains 89 )
+    assert( vectors.lookup(300000) contains 3 )
+    assert( vectors.lookup(50000) contains 30 )
+    assert( vectors.lookup(200000) contains 20 )
   }
+
+  val initialMeans = testObject.sampleVectors(vectors)
+  println("**** Clusters before running k-means: ****")
+  testObject.printResults(testObject.clusterResults(initialMeans, vectors))
+
+  println("**** Clusters after one iteration: ****")
+  val means1 = testObject.kmeans(initialMeans, vectors,
+    testObject.kmeansMaxIterations, false)
+  testObject.printResults(testObject.clusterResults(means1, vectors))
+
 
 }

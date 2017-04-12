@@ -28,8 +28,8 @@ object StackOverflow extends StackOverflow {
     val raw     = rawPostings(lines)
     val grouped = groupedPostings(raw)
     val scored  = scoredPostings(grouped)
-    val vectors = vectorPostings(scored).cache()
-    assert(vectors.count() == 2121822, "Incorrect number of vectors: " + vectors.count())
+    val vectors = vectorPostings(scored) //.cache()
+    //assert(vectors.count() == 2121822, "Incorrect number of vectors: " + vectors.count())
 
     val means   = kmeans(sampleVectors(vectors), vectors, debug = true)
     val results = clusterResults(means, vectors)
@@ -132,7 +132,7 @@ class StackOverflow extends Serializable {
         for( langIdx <- firstLangInTag(p.tags, langs) ) yield (langIdx*langSpread, score)
     }
 
-  }
+  }.setName("vectors").cache()
 
 
   /** Sample the vectors */
@@ -293,7 +293,8 @@ class StackOverflow extends Serializable {
       val (langIds, scores) = vs.unzip
       val sortedScores = scores.toSeq.sorted
       val clusterSize = sortedScores.length
-      val medianScore = sortedScores(clusterSize/2)
+      val medianScore = if (clusterSize % 2 == 1) sortedScores(clusterSize/2) else
+        (sortedScores(clusterSize/2) + sortedScores(clusterSize/2-1))/2
 
       val langIdxs = (langIds map (_ / langSpread)) toSeq
       val langCounts = langIdxs.groupBy(langs(_)).mapValues(_.size)
@@ -302,16 +303,6 @@ class StackOverflow extends Serializable {
       (langLabel, langPercent, clusterSize, medianScore)
     }
     val median = closestGrouped.mapValues(summarize)
-/*
-    val median = closestGrouped.mapValues { vs =>
-      val langLabel: String   = ??? // most common language in the cluster
-      val langPercent: Double = ??? // percent of the questions in the most common language
-      val clusterSize: Int    = ???
-      val medianScore: Int    = ???
-
-      (langLabel, langPercent, clusterSize, medianScore)
-    }
-*/
     median.collect().map(_._2).sortBy(_._4)
   }
 
