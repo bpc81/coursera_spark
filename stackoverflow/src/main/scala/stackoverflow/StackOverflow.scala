@@ -17,6 +17,10 @@ object StackOverflow extends StackOverflow {
   @transient lazy val conf: SparkConf = new SparkConf().setMaster("local").setAppName("StackOverflow")
   @transient lazy val sc: SparkContext = new SparkContext(conf)
 
+  import org.apache.log4j.{Logger,Level}
+  Logger.getLogger("org").setLevel(Level.WARN)
+  Logger.getLogger("akka").setLevel(Level.WARN)
+
   /** Main function */
   def main(args: Array[String]): Unit = {
 
@@ -27,7 +31,7 @@ object StackOverflow extends StackOverflow {
     val vectors = vectorPostings(scored)
     assert(vectors.count() == 2121822, "Incorrect number of vectors: " + vectors.count())
 
-//    val means   = kmeans(sampleVectors(vectors), vectors, debug = true)
+    val means   = kmeans(sampleVectors(vectors), vectors, debug = true)
 //    val results = clusterResults(means, vectors)
 //    printResults(results)
   }
@@ -182,9 +186,11 @@ class StackOverflow extends Serializable {
 
   /** Main kmeans computation */
   @tailrec final def kmeans(means: Array[(Int, Int)], vectors: RDD[(Int, Int)], iter: Int = 1, debug: Boolean = false): Array[(Int, Int)] = {
-    val newMeans = means.clone() // you need to compute newMeans
+//    val newMeans = means.clone() // you need to compute newMeans
+    val buckets: RDD[(Int, Iterable[(Int,Int)])] = vectors.groupBy( findClosest(_, means) )
+    val newCenters = buckets.mapValues(averageVectors).collectAsMap
+    val newMeans = (0 until means.length).map(i => newCenters.getOrElse(i,means(i))).toArray
 
-    // TODO: Fill in the newMeans array
     val distance = euclideanDistance(means, newMeans)
 
     if (debug) {
