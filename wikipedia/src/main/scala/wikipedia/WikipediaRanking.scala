@@ -81,7 +81,13 @@ object WikipediaRanking {
    *   Note: this operation is long-running. It can potentially run for
    *   several seconds.
    */
-  def rankLangsReduceByKey(langs: List[String], rdd: RDD[WikipediaArticle]): List[(String, Int)] = ???
+  def rankLangsReduceByKey(langs: List[String], rdd: RDD[WikipediaArticle]): List[(String, Int)] = {
+    def articleMentions(art: WikipediaArticle): List[(String,Int)] = {
+      val words: Set[String] = art.text.split(' ').filter(langs.contains(_)).toSet
+      for(lang <- langs if words contains lang) yield (lang, 1)
+    }
+    rdd.flatMap(articleMentions).reduceByKey(_ + _).collect.sortBy(- _._2).toList
+  }
 
   def main(args: Array[String]) {
 
@@ -94,11 +100,12 @@ object WikipediaRanking {
     /* Languages ranked according to (2), using the inverted index */
     val langsRanked2: List[(String, Int)] = timed("Part 2: ranking using inverted index", rankLangsUsingIndex(index))
 
-    langsRanked foreach println
-    langsRanked2 foreach println
+//    langsRanked foreach println
+//    langsRanked2 foreach println
 
     /* Languages ranked according to (3) */
-    //val langsRanked3: List[(String, Int)] = timed("Part 3: ranking using reduceByKey", rankLangsReduceByKey(langs, wikiRdd))
+    val langsRanked3: List[(String, Int)] = timed("Part 3: ranking using reduceByKey", rankLangsReduceByKey(langs, wikiRdd))
+    langsRanked3 foreach println
 
     /* Output the speed of each ranking */
     println(timing)
