@@ -14,7 +14,7 @@ case class Posting(postingType: Int, id: Int, acceptedAnswer: Option[Int], paren
 /** The main class */
 object StackOverflow extends StackOverflow {
 
-  @transient lazy val conf: SparkConf = new SparkConf().setMaster("local").setAppName("StackOverflow")
+  @transient lazy val conf: SparkConf = new SparkConf().setMaster("local[8]").setAppName("StackOverflow")
   @transient lazy val sc: SparkContext = new SparkContext(conf)
 
   import org.apache.log4j.{Logger,Level}
@@ -188,8 +188,9 @@ class StackOverflow extends Serializable {
   @tailrec final def kmeans(means: Array[(Int, Int)], vectors: RDD[(Int, Int)], iter: Int = 1, debug: Boolean = false): Array[(Int, Int)] = {
 //    val newMeans = means.clone() // you need to compute newMeans
     val buckets: RDD[(Int, Iterable[(Int,Int)])] = vectors.groupBy( findClosest(_, means) )
-    val newCenters = buckets.mapValues(averageVectors).collectAsMap
-    val newMeans = (0 until means.length).map(i => newCenters.getOrElse(i,means(i))).toArray
+    val newCenters: collection.GenMap[Int, (Int,Int)] = buckets.mapValues(averageVectors).collectAsMap
+    //val newMeans = means.indices.map(i => newCenters.getOrElse(i,means(i))).toArray
+    val newMeans = for((p,idx) <- means.zipWithIndex) yield newCenters.getOrElse(idx,p)
 
     val distance = euclideanDistance(means, newMeans)
 
