@@ -57,5 +57,6 @@ Temporary Items
 # Data directory
 data
 *.dat
+*.csv
 
 
