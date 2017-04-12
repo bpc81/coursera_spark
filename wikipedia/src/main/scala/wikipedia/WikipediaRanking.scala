@@ -52,16 +52,14 @@ object WikipediaRanking {
   def makeIndex(langs: List[String], rdd: RDD[WikipediaArticle]): RDD[(String, Iterable[WikipediaArticle])] = {
     // Version 1: using article.mentionsLanguage
     //rdd.flatMap(art => for(lang <- langs if art.mentionsLanguage(lang)) yield (lang,art)).groupByKey
-    def collapsedArticle(art: WikipediaArticle): WikipediaArticle =
-      WikipediaArticle(art.title, art.text.split(' ').filter(langs.contains(_)).mkString(" "))
+
+    // Version 2: collapsing article to only language words in one pass
     def articleMentions(art: WikipediaArticle): List[(String,WikipediaArticle)] = {
-      val a = collapsedArticle(art)
+      val a: WikipediaArticle = WikipediaArticle(art.title,
+      art.text.split(' ').filter(langs.contains(_)).mkString(" "))
       for(lang <- langs if a.mentionsLanguage(lang)) yield (lang,art)
     }
     rdd.flatMap(articleMentions).groupByKey
-//    val mentions = rdd.flatMap(art =>
-//      for(lang <- langs if collapsedArticle(art).mentionsLanguage(lang)) yield (lang,art))
-//    mentions.groupByKey
   }
 
   /* (2) Compute the language ranking again, but now using the inverted index. Can you notice
