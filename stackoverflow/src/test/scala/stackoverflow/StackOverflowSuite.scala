@@ -34,6 +34,7 @@ class StackOverflowSuite extends FunSuite with BeforeAndAfterAll {
   val rawPostings = testObject.rawPostings(sc.textFile("../../src/main/resources/stackoverflow/stackoverflow.csv"))
   val groupedPostings = testObject.groupedPostings(rawPostings)
   val scoredPostings = testObject.scoredPostings(groupedPostings)
+  val vectors = testObject.vectorPostings(scoredPostings)
 
   test("grouped postings") {
     groupedPostings.takeSample(true,20,0) foreach {
@@ -52,11 +53,23 @@ class StackOverflowSuite extends FunSuite with BeforeAndAfterAll {
   }
 
   test("given results contained in scored postings") {
-    assert( scoredPostings.lookup( Posting(1,6,None,None,140,Some("CSS")) ) === Array(67) )
-    assert( scoredPostings.lookup( Posting(1,42,None,None,155, Some("PHP"))) === Array(89) )
-    assert( scoredPostings.lookup( Posting(1,72,None,None,16,Some("Ruby"))) === Array(3) )
-    assert( scoredPostings.lookup( Posting(1,126,None,None,33,Some("Java"))) === Array(30) )
-    assert( scoredPostings.lookup( Posting(1,174,None,None,38,Some("C#"))) === Array(20) )
+    val myScoredSample = (scoredPostings.filter {case ((p,_)) => List(6,42,72,126,174) contains p.id}
+      ).collectAsMap
+
+    assert( myScoredSample( Posting(1,6,None,None,140,Some("CSS")) ) === 67 )
+    assert( myScoredSample( Posting(1,42,None,None,155, Some("PHP"))) === 89 )
+    assert( myScoredSample( Posting(1,72,None,None,16,Some("Ruby"))) === 3 )
+    assert( myScoredSample( Posting(1,126,None,None,33,Some("Java"))) === 30 )
+    assert( myScoredSample( Posting(1,174,None,None,38,Some("C#"))) === 20 )
+  }
+
+  test("given results contained in vectors") {
+    val myVectors = vectors.persist()
+    assert( myVectors.lookup(350000) contains 67 )
+    assert( myVectors.lookup(100000) contains 89 )
+    assert( myVectors.lookup(300000) contains 3 )
+    assert( myVectors.lookup(50000) contains 30 )
+    assert( myVectors.lookup(200000) contains 20 )
   }
 
 }
