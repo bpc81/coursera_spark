@@ -32,8 +32,8 @@ object StackOverflow extends StackOverflow {
     assert(vectors.count() == 2121822, "Incorrect number of vectors: " + vectors.count())
 
     val means   = kmeans(sampleVectors(vectors), vectors, debug = true)
-//    val results = clusterResults(means, vectors)
-//    printResults(results)
+    val results = clusterResults(means, vectors)
+    printResults(results)
   }
 }
 
