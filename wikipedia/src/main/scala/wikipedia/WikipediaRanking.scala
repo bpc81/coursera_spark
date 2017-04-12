@@ -54,10 +54,12 @@ object WikipediaRanking {
     //rdd.flatMap(art => for(lang <- langs if art.mentionsLanguage(lang)) yield (lang,art)).groupByKey
 
     // Version 2: collapsing article to only language words in one pass
+    // Update: Subsequent processing does not need actual text of article.
+    //  Returning collapsed article to avoid duplication.
     def articleMentions(art: WikipediaArticle): List[(String,WikipediaArticle)] = {
       val a: WikipediaArticle = WikipediaArticle(art.title,
       art.text.split(' ').filter(langs.contains(_)).mkString(" "))
-      for(lang <- langs if a.mentionsLanguage(lang)) yield (lang,art)
+      for(lang <- langs if a.mentionsLanguage(lang)) yield (lang,a)
     }
     rdd.flatMap(articleMentions).groupByKey
   }
