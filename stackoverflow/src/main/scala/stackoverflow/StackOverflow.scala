@@ -296,7 +296,7 @@ class StackOverflow extends Serializable {
       val medianScore = sortedScores(clusterSize/2)
 
       val langIdxs = (langIds map (_ / langSpread)) toSeq
-      val langCounts = langIds.groupBy(langs(_)).mapValues(_.size)
+      val langCounts = langIdxs.groupBy(langs(_)).mapValues(_.size)
       val (langLabel, langCount) = langCounts.maxBy(_._2)
       val langPercent = (100d * langCount) / clusterSize
       (langLabel, langPercent, clusterSize, medianScore)
