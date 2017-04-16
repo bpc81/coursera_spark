@@ -158,9 +158,9 @@ object TimeUsage {
       .otherwise("elder")
 
 
-    val primaryNeedsProjection: Column = primaryNeedsColumns.reduce(_ + _)
-    val workProjection: Column = workColumns.reduce(_ + _)
-    val otherProjection: Column = otherColumns.reduce(_ + _)
+    val primaryNeedsProjection: Column = primaryNeedsColumns.reduce(_ + _) / 60
+    val workProjection: Column = workColumns.reduce(_ + _) / 60
+    val otherProjection: Column = otherColumns.reduce(_ + _) / 60
     df
       .select(workingStatusProjection, sexProjection, ageProjection, primaryNeedsProjection, workProjection, otherProjection)
       .where($"telfs" <= 4) // Discard people who are not in labor force
