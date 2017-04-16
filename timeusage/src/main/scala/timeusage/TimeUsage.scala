@@ -15,7 +15,7 @@ object TimeUsage {
     SparkSession
       .builder()
       .appName("Time Usage")
-      .config("spark.master", "local")
+      .config("spark.master", "local[8]")
       .getOrCreate()
 
   import org.apache.log4j.{Logger,Level}
