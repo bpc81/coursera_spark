@@ -143,9 +143,20 @@ object TimeUsage {
     otherColumns: List[Column],
     df: DataFrame
   ): DataFrame = {
-    val workingStatusProjection: Column = ???
-    val sexProjection: Column = ???
-    val ageProjection: Column = ???
+    //val view = df.createTempView("df")
+    val workingStatusProjection: Column = when(
+      df("telfs") >= 1 && df("telfs") < 3, "working")
+        .otherwise("not working")
+
+    val sexProjection: Column = when(
+      df("tesex") === 1, "male")
+      .otherwise("female")
+
+    val ageProjection: Column = when(
+      df("teage") between(15,22), "young")
+      .when(df("teage") between(23,55), "active")
+      .otherwise("elder")
+
 
     val primaryNeedsProjection: Column = ???
     val workProjection: Column = ???
