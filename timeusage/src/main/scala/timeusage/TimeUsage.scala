@@ -102,8 +102,23 @@ object TimeUsage {
       name.startsWith("t1801") ||
       name.startsWith("t1803")
     )
-    val (work, others) = temp.partition( name =>
+    val (work, temp2) = temp.partition( name =>
       name.startsWith("t05") || name.startsWith("t1805")
+    )
+    val others = temp2 filter(name =>
+      name.startsWith("t02") ||
+      name.startsWith("t04") ||
+      name.startsWith("t06") ||
+      name.startsWith("t07") ||
+      name.startsWith("t08") ||
+      name.startsWith("t09") ||
+      name.startsWith("t10") ||
+      name.startsWith("t12") ||
+      name.startsWith("t13") ||
+      name.startsWith("t14") ||
+      name.startsWith("t15") ||
+      name.startsWith("t16") ||
+      name.startsWith("t18")
     )
 
     val primaryCols = primary.map( col(_) )
