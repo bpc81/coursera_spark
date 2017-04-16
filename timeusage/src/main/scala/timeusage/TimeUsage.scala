@@ -36,7 +36,7 @@ object TimeUsage {
     val summaryDf = timeUsageSummary(primaryNeedsColumns, workColumns, otherColumns, initDf)
     val finalDf = timeUsageGrouped(summaryDf)
     val finalDfSql = timeUsageGroupedSql(summaryDf)
-    finalDfSql.show()
+    finalDf.show()
   }
 
   /** @return The read DataFrame along with its column names. */
@@ -211,6 +211,10 @@ object TimeUsage {
     */
   def timeUsageGrouped(summed: DataFrame): DataFrame = {
     summed.groupBy($"working",$"sex",$"age").avg().sort($"working",$"sex",$"age")
+      .withColumn("work", $"avg(work)".cast(IntegerType))
+      .withColumn("primaryNeeds", $"avg(primaryNeeds)".cast(IntegerType))
+      .withColumn("other", $"avg(other)".cast(IntegerType))
+      .drop("avg(work)", "avg(primaryNeeds)", "avg(other)")
   }
 
   /**
