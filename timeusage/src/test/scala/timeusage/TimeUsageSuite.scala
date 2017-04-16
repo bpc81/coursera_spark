@@ -42,4 +42,16 @@ class TimeUsageSuite extends FunSuite with BeforeAndAfterAll {
     println(s"Number of rows: $numRows")
   }
 
+  test("classified columns") {
+    val (columns, initDf) = read("/timeusage/atussum.csv")
+    val (primaryNeedsColumns, workColumns, otherColumns) = classifiedColumns(columns)
+    assert(primaryNeedsColumns.length === 55)
+    assert(workColumns.length === 23)
+    assert(otherColumns.length === 432)
+    println("Counting columns:")
+    println(s"  Primary needs: ${primaryNeedsColumns.length}")
+    println(s"  Work: ${workColumns.length}")
+    println(s"  Other: ${otherColumns.length}")
+
+  }
 }
