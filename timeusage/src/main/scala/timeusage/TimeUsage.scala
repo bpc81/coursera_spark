@@ -102,9 +102,10 @@ object TimeUsage {
       name.startsWith("t1801") ||
       name.startsWith("t1803")
     )
-    val (work, others) = columnNames.partition( name =>
+    val (work, others) = temp.partition( name =>
       name.startsWith("t05") || name.startsWith("t1805")
     )
+
     val primaryCols = primary.map( col(_) )
     val workCols = work map (col(_))
     val othersCols = others map (col(_))

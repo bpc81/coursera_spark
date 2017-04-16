@@ -52,7 +52,7 @@ class TimeUsageSuite extends FunSuite with BeforeAndAfterAll {
     val (primaryNeedsColumns, workColumns, otherColumns) = classifiedColumns(columns)
     assert(primaryNeedsColumns.length === 55)
     assert(workColumns.length === 23)
-    assert(otherColumns.length === 432)
+    assert(otherColumns.length === 376)
     println("Counting columns:")
     println(s"  Primary needs: ${primaryNeedsColumns.length}")
     println(s"  Work: ${workColumns.length}")
