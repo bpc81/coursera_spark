@@ -18,6 +18,10 @@ object TimeUsage {
       .config("spark.master", "local")
       .getOrCreate()
 
+  import org.apache.log4j.{Logger,Level}
+  Logger.getLogger("org").setLevel(Level.WARN)
+  Logger.getLogger("akka").setLevel(Level.WARN)
+
   // For implicit conversions like converting RDDs to DataFrames
   import spark.implicits._
 
@@ -189,7 +193,7 @@ object TimeUsage {
     * Finally, the resulting DataFrame should be sorted by working status, sex and age.
     */
   def timeUsageGrouped(summed: DataFrame): DataFrame = {
-    ???
+    summed.groupBy($"working",$"sex",$"age").avg()
   }
 
   /**
@@ -206,7 +210,10 @@ object TimeUsage {
     * @param viewName Name of the SQL view to use
     */
   def timeUsageGroupedSqlQuery(viewName: String): String =
-    ???
+    s"""
+      |SELECT
+      |FROM $viewName
+    """.stripMargin
 
   /**
     * @return A `Dataset[TimeUsageRow]` from the “untyped” `DataFrame`
