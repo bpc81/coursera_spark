@@ -13,8 +13,13 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 import scala.util.Random
 
+
 @RunWith(classOf[JUnitRunner])
 class TimeUsageSuite extends FunSuite with BeforeAndAfterAll {
+  import org.apache.log4j.{Logger,Level}
+  Logger.getLogger("org").setLevel(Level.WARN)
+  Logger.getLogger("akka").setLevel(Level.WARN)
+
   import TimeUsage._
 
   val resource = "/timeusage/atussum.csv"
