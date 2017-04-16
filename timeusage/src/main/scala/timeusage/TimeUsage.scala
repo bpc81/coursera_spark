@@ -228,7 +228,10 @@ object TimeUsage {
     */
   def timeUsageGroupedSqlQuery(viewName: String): String =
     s"""
-      |SELECT working, age, sex, AVG(primaryNeeds), AVG(work), AVG(other)
+      |SELECT working, age, sex,
+      |ROUND(AVG(primaryNeeds),0) AS primaryNeeds,
+      |ROUND(AVG(work),0) AS work,
+      |ROUND(AVG(other),0) AS other
       |FROM $viewName
       |GROUP BY working, sex, age
       |SORT BY working, sex, age
