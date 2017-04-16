@@ -91,7 +91,20 @@ object TimeUsage {
     *    “t10”, “t12”, “t13”, “t14”, “t15”, “t16” and “t18” (those which are not part of the previous groups only).
     */
   def classifiedColumns(columnNames: List[String]): (List[Column], List[Column], List[Column]) = {
-    ???
+    val (primary, temp) = columnNames.tail.partition(name =>
+      name.startsWith("t01") ||
+      name.startsWith("t03") ||
+      name.startsWith("t11") ||
+      name.startsWith("t1801") ||
+      name.startsWith("t1803")
+    )
+    val (work, others) = columnNames.partition( name =>
+      name.startsWith("t05") || name.startsWith("t1805")
+    )
+    val primaryCols = primary.map( col(_) )
+    val workCols = work map (col(_))
+    val othersCols = others map (col(_))
+    (primaryCols, workCols, othersCols)
   }
 
   /** @return a projection of the initial DataFrame such that all columns containing hours spent on primary needs
