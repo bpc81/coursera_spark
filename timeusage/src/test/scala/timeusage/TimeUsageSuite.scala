@@ -52,6 +52,13 @@ class TimeUsageSuite extends FunSuite with BeforeAndAfterAll {
     println(s"  Primary needs: ${primaryNeedsColumns.length}")
     println(s"  Work: ${workColumns.length}")
     println(s"  Other: ${otherColumns.length}")
+  }
 
+  test("summary dataset") {
+    val (columns, initDf) = read("/timeusage/atussum.csv")
+    val (primaryNeedsColumns, workColumns, otherColumns) = classifiedColumns(columns)
+    val summaryDf = timeUsageSummary(primaryNeedsColumns, workColumns, otherColumns, initDf)
+    summaryDf.printSchema()
+    summaryDf.show(10)
   }
 }
