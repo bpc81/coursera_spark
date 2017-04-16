@@ -241,8 +241,19 @@ object TimeUsage {
     * Hint: you should use the `getAs` method of `Row` to look up columns and
     * cast them at the same time.
     */
-  def timeUsageSummaryTyped(timeUsageSummaryDf: DataFrame): Dataset[TimeUsageRow] =
-    ???
+  def timeUsageSummaryTyped(timeUsageSummaryDf: DataFrame): Dataset[TimeUsageRow] = {
+
+    def convertRow(row: Row): TimeUsageRow = {
+      val working = row.getAs[String]("working")
+      val sex = row.getAs[String]("sex")
+      val age = row.getAs[String]("age")
+      val primaryNeeds = row.getAs[Double]("primaryNeeds")
+      val work = row.getAs[Double]("work")
+      val other = row.getAs[Double]("other")
+      TimeUsageRow(working,sex,age,primaryNeeds,work,other)
+    }
+    timeUsageSummaryDf map convertRow
+  }
 
   /**
     * @return Same as `timeUsageGrouped`, but using the typed API when possible
