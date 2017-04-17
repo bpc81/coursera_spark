@@ -11,6 +11,10 @@ object TimeUsage {
   import org.apache.spark.sql.SparkSession
   import org.apache.spark.sql.functions._
 
+  import org.apache.log4j.{Logger,Level}
+  Logger.getLogger("org").setLevel(Level.WARN)
+  Logger.getLogger("akka").setLevel(Level.WARN)
+
   val spark: SparkSession =
     SparkSession
       .builder()
@@ -18,9 +22,6 @@ object TimeUsage {
       .config("spark.master", "local[8]")
       .getOrCreate()
 
-  import org.apache.log4j.{Logger,Level}
-  Logger.getLogger("org").setLevel(Level.WARN)
-  Logger.getLogger("akka").setLevel(Level.WARN)
 
   // For implicit conversions like converting RDDs to DataFrames
   import spark.implicits._
