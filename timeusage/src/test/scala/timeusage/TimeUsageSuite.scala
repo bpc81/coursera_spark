@@ -48,7 +48,7 @@ class TimeUsageSuite extends FunSuite with BeforeAndAfterAll {
   }
 
   test("classified columns") {
-    val (columns, initDf) = read("/timeusage/atussum.csv")
+    val (columns, initDf) = read(resource)
     val (primaryNeedsColumns, workColumns, otherColumns) = classifiedColumns(columns)
     assert(primaryNeedsColumns.length === 55)
     assert(workColumns.length === 23)
@@ -60,10 +60,19 @@ class TimeUsageSuite extends FunSuite with BeforeAndAfterAll {
   }
 
   test("summary dataset") {
-    val (columns, initDf) = read("/timeusage/atussum.csv")
+    val (columns, initDf) = read(resource)
     val (primaryNeedsColumns, workColumns, otherColumns) = classifiedColumns(columns)
     val summaryDf = timeUsageSummary(primaryNeedsColumns, workColumns, otherColumns, initDf)
     summaryDf.printSchema()
     summaryDf.show(10)
+  }
+
+  test("create typed dataset") {
+    import org.apache.spark.sql.Dataset
+    val (columns, initDf) = read(resource)
+    val (primaryNeedsColumns, workColumns, otherColumns) = classifiedColumns(columns)
+    val summaryDf = timeUsageSummary(primaryNeedsColumns, workColumns, otherColumns, initDf)
+    val summaryTyped: Dataset[TimeUsageRow] = timeUsageSummaryTyped(summaryDf)
+    summaryTyped.show(10)
   }
 }
